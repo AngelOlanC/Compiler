@@ -3,6 +3,8 @@ package MVC.Model;
 import java.util.ArrayList;
 
 public class SyntaxAnalyzer {
+  private final String[] reservedWords = {"begin", "end", "read", "print", "if", "else",
+      "while", "continue", "break", "exit", "int", "string"};
   private SymbolTable symbolTable;
   private ArrayList<SyntaxError> errors;
   
@@ -13,6 +15,7 @@ public class SyntaxAnalyzer {
 
   public boolean analyze(String source) {
     symbolTable.entries.clear();
+    errors.clear();
     
     int i = 0, n = source.length(), line = 1, last_new_line = -1;
     while (i < n) {
@@ -24,7 +27,11 @@ public class SyntaxAnalyzer {
           if (++i == n) break;
           c = source.charAt(i);
         } while (Character.isLowerCase(c) || Character.isDigit(c));
-        symbolTable.install(new Lexeme(Token.IDENTIFIER, value.toString()), line, i - last_new_line);
+        if (isReservedWord(value.toString())) {
+          symbolTable.install(new Lexeme(Token.RESERVED_WORD, value.toString()), line, i - last_new_line);
+        } else {
+          symbolTable.install(new Lexeme(Token.IDENTIFIER, value.toString()), line, i - last_new_line);
+        }
         continue;
       }
       if (c == '"') {
@@ -137,6 +144,13 @@ public class SyntaxAnalyzer {
       ++i;
     }
     return true;
+  }
+
+  private boolean isReservedWord(String word) {
+    for (String reservedWord : reservedWords) {
+      if (word.equals(reservedWord)) return true;
+    }
+    return false;
   }
 
   public SymbolTable getSymbolTable() {
