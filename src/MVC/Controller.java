@@ -2,15 +2,17 @@ package MVC;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import MVC.Model.SymbolTable;
-import MVC.Model.SyntaxAnalyzer;
+
+import java.util.ArrayList;
+
+import MVC.Model.Scanner;
+import MVC.Model.Parser;
+import MVC.Model.Token;
 
 public class Controller implements ActionListener {
-  private SyntaxAnalyzer syntaxAnalyzer;
   private View view;
 
-  public Controller(SymbolTable symbolTable, View view) {
-    syntaxAnalyzer = new SyntaxAnalyzer(symbolTable);
+  public Controller(View view) {
     this.view = view;
     view.setListener(this);
   }
@@ -18,15 +20,35 @@ public class Controller implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     if (e.getSource() == view.getStartButton()) {
-      String sourceCode = view.getCodingArea().getText();
-      syntaxAnalyzer.analyze(sourceCode);
+      view.resetResultsText();
 
-      view.getSymbolTablePane().setText(syntaxAnalyzer.getSymbolTable().toString());
+      String sourceCode = view.getCodingArea().getText(); 
 
-      String errorsText = syntaxAnalyzer.getErrorsText();
-      if (errorsText.isEmpty()) errorsText = "No errors found";
-      view.getErrorsPane().setText(errorsText);
-      
+      Scanner scanner = new Scanner(sourceCode);
+      if (!scanner.analyze()) {
+        view
+          .getTokensPane()
+          .setText("ERROR"); 
+        return;
+      }
+      ArrayList<Token> tokenStream = scanner.getTokenStream();
+      view.getTokensPane()
+        .setText(
+          tokenStream
+            .stream()
+            .reduce("", (partialString, token) -> partialString + token.toString() + "\n", String::concat)
+        );
+
+      Parser parser = new Parser(tokenStream);
+      if (!parser.analyze()) {
+        view
+          .getParserPane()
+          .setText("ERROR");
+          return;
+      }
+      view
+        .getParserPane()
+        .setText("CORRECT"); 
       return;
     }
   }

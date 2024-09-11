@@ -14,16 +14,23 @@ import javax.swing.JTextPane;
 
 public class View extends JFrame {
   private JTextArea codingArea;
-  private JTextPane symbolTablePane, errorsPane;
+  private JTextPane tokensPane, parserPane;
   private JButton startButton;
 
   public View() {
-    setSize(1000, 600);
+    setSize(1300, 600);
     setLocationRelativeTo(null);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLayout(null);
     setVisible(true);
-    
+
+    makeInterface();
+
+    revalidate();
+    repaint();
+  }
+
+  private void makeInterface() {
     Font outerTextFont = new Font("New Courier", Font.PLAIN, 30);
     Font innerTextFont = new Font("New Courier", Font.PLAIN, 15);
 
@@ -42,61 +49,64 @@ public class View extends JFrame {
     scrollCode.setBounds(50, 50, 600, 400);
     add(scrollCode);
 
-    JLabel textSymbolTablePane = new JLabel("TOKENS");
-    textSymbolTablePane.setFont(outerTextFont);
-    textSymbolTablePane.setBounds(700, 10, 1000, 50);
-    add(textSymbolTablePane);
+    JLabel textTokensPane = new JLabel("TOKENS");
+    textTokensPane.setFont(outerTextFont);
+    textTokensPane.setBounds(700, 10, 1000, 50);
+    add(textTokensPane);
 
-    symbolTablePane = new JTextPane();
-    symbolTablePane.setEnabled(false);
-    symbolTablePane.setBackground(Color.WHITE);
-    symbolTablePane.setOpaque(true);
-    symbolTablePane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    symbolTablePane.setDisabledTextColor(Color.BLACK);
-    symbolTablePane.setFont(innerTextFont);
+    tokensPane = new JTextPane();
+    tokensPane.setEnabled(false);
+    tokensPane.setBackground(Color.WHITE);
+    tokensPane.setOpaque(true);
+    tokensPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    tokensPane.setDisabledTextColor(Color.BLACK);
+    tokensPane.setFont(innerTextFont);
 
-    JScrollPane scrollSymbol = new JScrollPane(symbolTablePane);
-    scrollSymbol.setBounds(700, 50, 250, 300);
+    JScrollPane scrollSymbol = new JScrollPane(tokensPane);
+    scrollSymbol.setBounds(700, 50, 250, 400);
     add(scrollSymbol);
 
-    JLabel textErrorsPane = new JLabel("ERRORS");
-    textErrorsPane.setFont(outerTextFont);
-    textErrorsPane.setBounds(700, 350, 1000, 50);
-    add(textErrorsPane);
-    
-    errorsPane = new JTextPane();
-    errorsPane.setEnabled(false);
-    errorsPane.setBackground(Color.WHITE);
-    errorsPane.setOpaque(true);
-    errorsPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    errorsPane.setDisabledTextColor(Color.BLACK);
-    errorsPane.setFont(innerTextFont);
+    JLabel textParserPane = new JLabel("PARSER");
+    textParserPane.setFont(outerTextFont);
+    textParserPane.setBounds(1000, 10, 1000, 50);
+    add(textParserPane);
 
-    JScrollPane scrollErrors = new JScrollPane(errorsPane);
-    scrollErrors.setBounds(700, 400, 250, 150);
-    add(scrollErrors);
+    parserPane = new JTextPane();
+    parserPane.setEnabled(false);
+    parserPane.setBackground(Color.WHITE);
+    parserPane.setOpaque(true);
+    parserPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    parserPane.setDisabledTextColor(Color.BLACK);
+    parserPane.setFont(innerTextFont);
+
+    JScrollPane scrollParser = new JScrollPane(parserPane);
+    scrollParser.setBounds(1000, 50, 250, 400);
+    add(scrollParser);
 
     add(startButton = new JButton());
-    startButton.setBounds(300, 500, 150, 50);
+    startButton.setBounds(600, 500, 150, 50);
     startButton.setText("Scan");
-    revalidate();
-    repaint();
   }
 
   public void setListener(Controller controller) {
     startButton.addActionListener(controller);
   }
 
+  public void resetResultsText() {
+    tokensPane.setText("");
+    parserPane.setText("");
+  }
+
   public JTextArea getCodingArea() {
     return codingArea;
   }
 
-  public JTextPane getSymbolTablePane() {
-    return symbolTablePane;
+  public JTextPane getTokensPane() {
+    return tokensPane;
   }
 
-  public JTextPane getErrorsPane() {
-    return errorsPane;
+  public JTextPane getParserPane() {
+    return parserPane;
   }
 
   public JButton getStartButton() {
