@@ -14,7 +14,7 @@ import javax.swing.JTextPane;
 
 public class View extends JFrame {
   private JTextArea codingArea;
-  private JTextPane tokensPane, parserPane;
+  private JTextPane tokensPane, parserPane, semanticPane;
   private JButton startButton;
 
   public View() {
@@ -80,8 +80,25 @@ public class View extends JFrame {
     parserPane.setFont(innerTextFont);
 
     JScrollPane scrollParser = new JScrollPane(parserPane);
-    scrollParser.setBounds(1000, 50, 250, 400);
+    scrollParser.setBounds(1000, 50, 200, 150);
     add(scrollParser);
+
+    JLabel textSemanticPane = new JLabel("SEMANTIC");
+    textSemanticPane.setFont(outerTextFont);
+    textSemanticPane.setBounds(1000, 250, 1000, 50);
+    add(textSemanticPane);
+
+    semanticPane = new JTextPane();
+    semanticPane.setEnabled(false);
+    semanticPane.setBackground(Color.WHITE);
+    semanticPane.setOpaque(true);
+    semanticPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    semanticPane.setDisabledTextColor(Color.BLACK);
+    semanticPane.setFont(innerTextFont);
+
+    JScrollPane scrollSemantic = new JScrollPane(semanticPane);
+    scrollSemantic.setBounds(1000, 300, 200, 150);
+    add(scrollSemantic);
 
     add(startButton = new JButton());
     startButton.setBounds(600, 500, 150, 50);
@@ -95,6 +112,7 @@ public class View extends JFrame {
   public void resetResultsText() {
     tokensPane.setText("");
     parserPane.setText("");
+    semanticPane.setText("");
   }
 
   public JTextArea getCodingArea() {
@@ -111,5 +129,9 @@ public class View extends JFrame {
 
   public JButton getStartButton() {
     return startButton;
+  }
+
+  public JTextPane getSemanticPane() {
+    return semanticPane;
   }
 }

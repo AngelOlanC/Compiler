@@ -1,0 +1,25 @@
+{
+  int x
+  read x
+  if x == 1 {
+    print "even"
+  }
+  if x == 2 {
+    print "odd"
+  }
+  if x == 3 {
+    print "even"
+  }
+  if x == 4 {
+    print "odd"
+  }
+  if x == 5 {
+    print "even"
+  }
+  if x == 6 {
+    print "odd"
+  }
+  if x == 7 {
+    print "even"
+  }
+}

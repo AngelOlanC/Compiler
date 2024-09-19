@@ -1,0 +1,29 @@
+{
+  int n
+  read n
+
+  int x
+  read x
+
+  int ans
+  ans = 0
+
+  int i
+  i = 0
+  while i <= n {
+    int j
+    j = 0
+    while j <= i {
+      int k
+      k = 0
+      while k <= j {
+        int suma
+        suma = ((i + j) + k)
+        if suma == x {
+          ans = (ans + 1)
+        }
+      }
+    }
+  }
+  print ("the count is " + ans)
+}

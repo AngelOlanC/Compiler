@@ -5,12 +5,15 @@ import java.awt.event.ActionListener;
 
 import java.util.ArrayList;
 
-import MVC.Model.Scanner;
-import MVC.Model.Parser;
-import MVC.Model.Token;
+import MVC.Model.Parser.Parser;
+import MVC.Model.Scanner.Scanner;
+import MVC.Model.Scanner.Token;
+import MVC.Model.SemanticAnalysis.SemanticAnalyzer;
+import MVC.Model.SymbolTable.SymbolTable;
 
 public class Controller implements ActionListener {
   private View view;
+  private SymbolTable symbolTable;
 
   public Controller(View view) {
     this.view = view;
@@ -21,10 +24,11 @@ public class Controller implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     if (e.getSource() == view.getStartButton()) {
       view.resetResultsText();
+      symbolTable = new SymbolTable();
 
       String sourceCode = view.getCodingArea().getText(); 
 
-      Scanner scanner = new Scanner(sourceCode);
+      Scanner scanner = new Scanner(symbolTable, sourceCode);
       if (!scanner.analyze()) {
         view
           .getTokensPane()
@@ -49,6 +53,18 @@ public class Controller implements ActionListener {
       view
         .getParserPane()
         .setText("CORRECT"); 
+      System.out.println(parser.getParseTree());
+
+      SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(symbolTable, parser.getParseTree());
+      if (!semanticAnalyzer.analyze()) {
+        view
+          .getSemanticPane()
+          .setText("ERROR");
+          return;
+      }
+      view
+      .getSemanticPane()
+      .setText("CORRECT"); 
       return;
     }
   }
