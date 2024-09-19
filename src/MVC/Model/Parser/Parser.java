@@ -3,7 +3,6 @@ package MVC.Model.Parser;
 import java.util.ArrayList;
 
 import MVC.Model.Constants.*;
-import MVC.Model.Parser.ParseTree;
 import MVC.Model.Parser.Node.*;
 import MVC.Model.Scanner.Token;
 

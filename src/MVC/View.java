@@ -1,6 +1,5 @@
 package MVC;
 
-
 import java.awt.Color;
 import java.awt.Font;
 
@@ -15,7 +14,7 @@ import javax.swing.JTextPane;
 public class View extends JFrame {
   private JTextArea codingArea;
   private JTextPane tokensPane, parserPane, semanticPane;
-  private JButton startButton;
+  private JButton startScannerButton, startParserButton, startSemanticButton;
 
   public View() {
     setSize(1300, 600);
@@ -100,13 +99,24 @@ public class View extends JFrame {
     scrollSemantic.setBounds(1000, 300, 200, 150);
     add(scrollSemantic);
 
-    add(startButton = new JButton());
-    startButton.setBounds(600, 500, 150, 50);
-    startButton.setText("Scan");
+    add(startScannerButton = new JButton());
+    startScannerButton.setBounds(300, 480, 150, 50);
+    startScannerButton.setText("Scanner");
+
+    add(startParserButton = new JButton());
+    startParserButton.setBounds(550, 480, 150, 50);
+    startParserButton.setText("Parser");
+    
+    add(startSemanticButton = new JButton());
+    startSemanticButton.setBounds(800, 480, 150, 50);
+    startSemanticButton.setText("Semantic");
   }
 
   public void setListener(Controller controller) {
-    startButton.addActionListener(controller);
+    startScannerButton.addActionListener(controller);
+    startParserButton.addActionListener(controller);
+    startSemanticButton.addActionListener(controller);
+    codingArea.addKeyListener(controller);
   }
 
   public void resetResultsText() {
@@ -127,11 +137,19 @@ public class View extends JFrame {
     return parserPane;
   }
 
-  public JButton getStartButton() {
-    return startButton;
+  public JButton getStartScannerButton() {
+    return startScannerButton;
   }
 
   public JTextPane getSemanticPane() {
     return semanticPane;
+  }
+
+  public JButton getStartParserButton() {
+    return startParserButton;
+  }
+
+  public JButton getStartSemanticButton() {
+    return startSemanticButton;
   }
 }

@@ -44,10 +44,8 @@ public class SemanticAnalyzer {
     if (children.isEmpty()) return true;
 
     Node firstChild = children.getFirst();
-    System.out.println("A");
 
     if (firstChild instanceof NodeNonTerminal) {
-      System.out.println("DECLARATION");
       NodeTerminal dataTypeNode = (NodeTerminal) firstChild.getChildren().getFirst();
       Token dataTypeToken = dataTypeNode.getToken();
 
@@ -68,11 +66,8 @@ public class SemanticAnalyzer {
     NodeTerminal firstChildTerminal = (NodeTerminal) firstChild;
     Token firstChildToken = firstChildTerminal.getToken();
 
-    System.out.println(firstChildToken.toString());
-
     boolean isAssignation = firstChildToken.getTokenType() == TokenType.ID;
     if (isAssignation) {
-      System.out.println("ASSIGNATION");
       int identifierID = firstChildToken.getSymbolTableID();
       EntryID entry = (EntryID) symbolTable.getEntries().get(identifierID);
       if (!entry.isDeclared()) return false;
@@ -97,7 +92,6 @@ public class SemanticAnalyzer {
 
     boolean isWhile = firstChildToken.getSymbolTableID() == ReservedWord.WHILE.ordinal();
     if (isWhile) {
-      System.out.println("WHILE");
       loops++;
       if (!condition(children.get(1)) || !sentences(children.get(3))) return false;
       loops--;
