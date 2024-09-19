@@ -7,6 +7,8 @@ import MVC.Model.Constants.TokenType;
 import MVC.Model.LiteralValue.LiteralValueInteger;
 import MVC.Model.LiteralValue.LiteralValueString;
 import MVC.Model.SymbolTable.SymbolTable;
+import MVC.Model.SymbolTable.Entry.EntryID;
+import MVC.Model.SymbolTable.Entry.EntryLiteral;
 
 public class Scanner {
   private SymbolTable symbolTable;
@@ -76,16 +78,15 @@ public class Scanner {
         int reservedWordID = symbolTable.getRWID(text);
         if (reservedWordID != -1) {
           int idOnSymbolTable = symbolTable.getRWID(text);
-          tokenStream.add(new Token(TokenType.RW, text, idOnSymbolTable));  
+          tokenStream.add(new Token(TokenType.RW, text, idOnSymbolTable));
           continue;
         }
         int idOnSymbolTable = symbolTable.getIdentifierID(text, scopeID);
         if (idOnSymbolTable == -1) {
-          idOnSymbolTable = symbolTable.addEntry(text,
-                                                 TokenType.ID,
-                                                 null,
-                                                 scopeID,
-                                                 new LiteralValueString(text));
+          idOnSymbolTable = symbolTable.addEntry(new EntryID(text,
+                                                             TokenType.ID,
+                                                             null,
+                                                             scopeID));
         }
         tokenStream.add(new Token(TokenType.ID, text, idOnSymbolTable));
         continue;
@@ -100,11 +101,11 @@ public class Scanner {
         if (i < n && c == '"') {
           value.append(c);
           String text = value.toString();
-          int idOnSymbolTable = symbolTable.addEntry(text, 
+          int idOnSymbolTable = symbolTable.addEntry(
+                                    new EntryLiteral(text, 
                                                      TokenType.LITERAL, 
                                                      DataType.STRING,
-                                                     scopeID,
-                                                     new LiteralValueString(text.substring(1, text.length() - 1)));
+                                                     new LiteralValueString(text.substring(1, text.length() - 1))));
           tokenStream.add(new Token(TokenType.LITERAL, text, idOnSymbolTable));
           ++i;
           continue;
@@ -119,11 +120,11 @@ public class Scanner {
           c = source.charAt(i);
         } while (Character.isDigit(c));
         String text = value.toString();
-        int idOnSymbolTable = symbolTable.addEntry(text, 
-                                                   TokenType.LITERAL,
-                                                   DataType.INT,
-                                                   scopeID,
-                                                   new LiteralValueInteger(Integer.parseInt(text)));
+        int idOnSymbolTable = symbolTable.addEntry(
+                                    new EntryLiteral(text, 
+                                                     TokenType.LITERAL, 
+                                                     DataType.INT,
+                                                     new LiteralValueInteger(Integer.parseInt(text))));
         tokenStream.add(new Token(TokenType.LITERAL, text, idOnSymbolTable));
         continue;
       }

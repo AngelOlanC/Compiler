@@ -1,17 +1,20 @@
 package MVC.Model.SemanticAnalysis;
 
+import java.util.ArrayList;
+
 import MVC.Model.Constants.DataType;
 import MVC.Model.Constants.Production;
 import MVC.Model.Constants.ReservedWord;
 import MVC.Model.Constants.TokenType;
-import MVC.Model.LiteralValue.LiteralValue;
-import MVC.Model.LiteralValue.LiteralValueInteger;
-import MVC.Model.LiteralValue.LiteralValueString;
 import MVC.Model.Parser.ParseTree;
-import MVC.Model.Parser.ParseTree.Node;
+import MVC.Model.Parser.Node.Node;
+import MVC.Model.Parser.Node.NodeNonTerminal;
+import MVC.Model.Parser.Node.NodeTerminal;
 import MVC.Model.Scanner.Token;
 import MVC.Model.SymbolTable.SymbolTable;
-import MVC.Model.SymbolTable.SymbolTable.Entry;
+import MVC.Model.SymbolTable.Entry.Entry;
+import MVC.Model.SymbolTable.Entry.EntryID;
+import MVC.Model.SymbolTable.Entry.EntryLiteral;
 
 public class SemanticAnalyzer {
   private SymbolTable symbolTable;
@@ -37,60 +40,74 @@ public class SemanticAnalyzer {
   }
 
   private boolean sentence(Node node) {
-    if (node.getChildren().isEmpty()) return true;
+    ArrayList<Node> children = node.getChildren();
+    if (children.isEmpty()) return true;
 
-    boolean isDeclaration = node.getChildren().getFirst().getProduction() == Production.DATA_TYPE;
-    if (isDeclaration) {
-      int identifierID = node.getChildren().get(1).getToken().getSymbolTableID();
-      Entry entry = symbolTable.getEntries().get(identifierID);
-      if (entry.isDeclared()) return false;
-      entry.setDeclared(true);
-      String tokenTypeDataType = node.getChildren().get(0).getChildren().get(0).getToken().getValue();
-      entry.setDataType(tokenTypeDataType.equals("int") ? DataType.INT : DataType.STRING);
-      if (entry.getDataType() == DataType.INT) entry.setValue(new LiteralValueInteger(0));
-      else entry.setValue(new LiteralValueString(""));
-      return true;
+    Node firstChild = children.getFirst();
+    System.out.println("A");
+
+    if (firstChild instanceof NodeNonTerminal) {
+      System.out.println("DECLARATION");
+      NodeTerminal dataTypeNode = (NodeTerminal) firstChild.getChildren().getFirst();
+      Token dataTypeToken = dataTypeNode.getToken();
+
+      boolean isIntDeclaration = dataTypeToken.getSymbolTableID() == ReservedWord.INT.ordinal();
+      boolean isStringDeclaration = dataTypeToken.getSymbolTableID() == ReservedWord.STRING.ordinal();
+      if (isIntDeclaration || isStringDeclaration) {
+        NodeTerminal secondChild = (NodeTerminal) children.get(1);
+        int identifierID = secondChild.getToken().getSymbolTableID();
+        EntryID entry = (EntryID) symbolTable.getEntries().get(identifierID);
+        if (entry.isDeclared()) return false;
+        entry.declare();
+        entry.setDataType(isIntDeclaration ? DataType.INT : DataType.STRING);
+        return true;
+      }
+      return false;
     }
+    
+    NodeTerminal firstChildTerminal = (NodeTerminal) firstChild;
+    Token firstChildToken = firstChildTerminal.getToken();
 
-    Token firstChildToken = node.getChildren().getFirst().getToken();
+    System.out.println(firstChildToken.toString());
+
     boolean isAssignation = firstChildToken.getTokenType() == TokenType.ID;
     if (isAssignation) {
+      System.out.println("ASSIGNATION");
       int identifierID = firstChildToken.getSymbolTableID();
-      if (!symbolTable.getEntries().get(identifierID).isDeclared()) return false;
-      Entry entry = symbolTable.getEntries().get(identifierID);
-      LiteralValue literalValueOperation = operation(node.getChildren().get(2));
-      if (literalValueOperation == null ||
-          (literalValueOperation instanceof LiteralValueInteger && entry.getDataType() == DataType.STRING) ||
-          (literalValueOperation instanceof LiteralValueString && entry.getDataType() == DataType.INT))
-            return false;
-      entry.setValue(literalValueOperation);
-      return true;
+      EntryID entry = (EntryID) symbolTable.getEntries().get(identifierID);
+      if (!entry.isDeclared()) return false;
+      DataType variableDataType = entry.getDataType();
+      DataType operationResultType = operation(node.getChildren().get(2));
+      return operationResultType != null && variableDataType == operationResultType;
     }
     
     boolean isRead = firstChildToken.getSymbolTableID() == ReservedWord.READ.ordinal();
     if (isRead) {
-      int identifierID = node.getChildren().get(1).getToken().getSymbolTableID();
-      return symbolTable.getEntries().get(identifierID).isDeclared();
+      NodeTerminal nodeVariable = (NodeTerminal) children.get(1);
+      int identifierID = nodeVariable.getToken().getSymbolTableID();
+      EntryID entryVariable = (EntryID) symbolTable.getEntries().get(identifierID);
+      return entryVariable.isDeclared();
     }
 
     boolean isPrint = firstChildToken.getSymbolTableID() == ReservedWord.PRINT.ordinal();
     if (isPrint) {
-      LiteralValue literalValueOperation = operation(node.getChildren().get(1));
-      return literalValueOperation != null;
+      DataType operationResultType = operation(children.get(1));
+      return operationResultType != null;
     }
 
     boolean isWhile = firstChildToken.getSymbolTableID() == ReservedWord.WHILE.ordinal();
     if (isWhile) {
+      System.out.println("WHILE");
       loops++;
-      if (!condition(node.getChildren().get(1)) || !sentences(node.getChildren().get(3))) return false;
+      if (!condition(children.get(1)) || !sentences(children.get(3))) return false;
       loops--;
       return true;
     }
 
     boolean isIf = firstChildToken.getSymbolTableID() == ReservedWord.IF.ordinal();
     if (isIf) {
-      if (!condition(node.getChildren().get(1)) || !sentences(node.getChildren().get(3))) return false;
-      return node.getChildren().size() == 5 ? true : sentences(node.getChildren().get(7));
+      if (!condition(children.get(1)) || !sentences(children.get(3))) return false;
+      return children.size() == 5 ? true : sentences(children.get(7));
     }
 
     boolean isBreak = firstChildToken.getSymbolTableID() == ReservedWord.BREAK.ordinal();
@@ -100,60 +117,60 @@ public class SemanticAnalyzer {
     return true;
   }
 
-  private LiteralValue operation(Node node) {
-    Node firstChild = node.getChildren().get(0);
-    if (firstChild.getProduction() == Production.DATA) {
-      Token firstToken = firstChild.getChildren().getFirst().getToken();
-      Entry entry = symbolTable.getEntries().get(firstToken.getSymbolTableID());
-      if (firstToken.getTokenType() == TokenType.ID && !entry.isDeclared()) return null;
-      return entry.getValue();
+  private DataType operation(Node node) {
+    ArrayList<Node> children = node.getChildren();
+
+    if (children.getFirst() instanceof NodeNonTerminal) {
+      NodeNonTerminal firstChild = (NodeNonTerminal) children.getFirst();
+      if (firstChild.getProduction() == Production.DATA) {
+        NodeTerminal dataNode = (NodeTerminal) firstChild.getChildren().getFirst();
+        Token dataToken = dataNode.getToken();
+        Entry entry = symbolTable.getEntries().get(dataToken.getSymbolTableID());
+        if (entry instanceof EntryID) {
+          EntryID entryID = (EntryID) entry;
+          return entryID.isDeclared() ? entryID.getDataType() : null;
+        }
+        EntryLiteral entryLiteral = (EntryLiteral) entry;
+        return entryLiteral.getDataType();
+      }
     }
-    Token firstToken = node.getChildren().getFirst().getToken();
-    if (firstToken.getTokenType() == TokenType.ID) {
-      Entry entry = symbolTable.getEntries().get(firstToken.getSymbolTableID());
-      return entry.isDeclared() ? entry.getValue() : null;
+
+    DataType dataTypeLeftOperation = operation(children.get(1)),
+             dataTypeRightOperation = operation(children.get(3));
+    
+    if (dataTypeLeftOperation == null || dataTypeRightOperation == null) {
+      return null;
     }
-    LiteralValue literalValueLeft = operation(node.getChildren().get(1)),
-                 literalValueRight = operation(node.getChildren().get(3));
-    if (literalValueLeft == null || literalValueRight == null) return null;
-    boolean isSubstraction = node.getChildren().get(2).getToken().getTokenType() == TokenType.SUB;
+
+    NodeTerminal nodeOperator = (NodeTerminal) children.get(2).getChildren().get(0);
+    boolean isSubstraction = nodeOperator.getToken().getTokenType() == TokenType.SUB;
     if (isSubstraction) {
-      if (literalValueLeft instanceof LiteralValueString ||
-          literalValueRight instanceof LiteralValueString) {
+      if (dataTypeLeftOperation == DataType.STRING || dataTypeLeftOperation == DataType.STRING) {
         return null;
       }
-      LiteralValueInteger literalValueIntegerLeft = (LiteralValueInteger)literalValueLeft,
-                          literalValueIntegerRight = (LiteralValueInteger)literalValueRight;
-      return new LiteralValueInteger(literalValueIntegerLeft.getValue() - literalValueIntegerRight.getValue());
+      return DataType.INT;
     }
-    if (literalValueLeft instanceof LiteralValueString ||
-      literalValueRight instanceof LiteralValueString) {
-      String concat = "";
-      if (literalValueLeft instanceof LiteralValueString) {
-        concat += ((LiteralValueString)literalValueLeft).getValue();
-      } else {
-        concat += ((LiteralValueInteger)literalValueLeft).getValue();
-      }
-      if (literalValueRight instanceof LiteralValueString) {
-        concat += ((LiteralValueString)literalValueRight).getValue();
-      } else {
-        concat += ((LiteralValueInteger)literalValueRight).getValue();
-      }
-      return new LiteralValueString(concat);
+    if (dataTypeLeftOperation == DataType.STRING || dataTypeLeftOperation == DataType.STRING) {
+      return DataType.STRING;
     }
-    LiteralValueInteger literalValueIntegerLeft = (LiteralValueInteger)literalValueLeft,
-                        literalValueIntegerRight = (LiteralValueInteger)literalValueRight;
-    return new LiteralValueInteger(literalValueIntegerLeft.getValue() + literalValueIntegerRight.getValue());
+    return DataType.INT;
   }
 
   private boolean condition(Node node) {
-    LiteralValue literalValueLeft = operation(node.getChildren().get(0)),
-                 literalValueRight = operation(node.getChildren().get(2));
-    if ((literalValueLeft instanceof LiteralValueInteger && literalValueRight instanceof LiteralValueString) ||
-        (literalValueLeft instanceof LiteralValueString && literalValueRight instanceof LiteralValueInteger))
-        return false;
-    TokenType tokenTypeOperator = node.getChildren().get(1).getToken().getTokenType();
-    if (tokenTypeOperator == TokenType.EQUALS || tokenTypeOperator == TokenType.NEQ) return true;
-    return literalValueLeft instanceof LiteralValueInteger;
+    ArrayList<Node> children = node.getChildren();
+
+    DataType dataTypeLeftOperation = operation(children.get(0)),
+             dataTypeRightOperation = operation(children.get(2));
+
+    if (dataTypeLeftOperation == null || dataTypeRightOperation == null) {
+      return false;
+    }
+
+    NodeTerminal nodeOperator = (NodeTerminal) children.get(1).getChildren().get(0);
+    TokenType tokenTypeOperator = nodeOperator.getToken().getTokenType();
+    if (tokenTypeOperator == TokenType.EQUALS || tokenTypeOperator == TokenType.NEQ) {
+      return true;
+    }
+    return dataTypeLeftOperation == DataType.INT && dataTypeRightOperation == DataType.INT;
   }
 }

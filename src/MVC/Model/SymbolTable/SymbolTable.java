@@ -3,7 +3,8 @@ package MVC.Model.SymbolTable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import MVC.Model.Constants.*;
-import MVC.Model.LiteralValue.LiteralValue;
+import MVC.Model.SymbolTable.Entry.Entry;
+import MVC.Model.SymbolTable.Entry.EntryID;
 
 public class SymbolTable {
   private HashMap<String, Integer> symbols;
@@ -21,20 +22,20 @@ public class SymbolTable {
 
   private void initializeSymbolTable() {
     for (ReservedWord rw : ReservedWord.values()) {
-      addEntry(rw.name().toLowerCase(), TokenType.RW, null, null, null);
+      addEntry(new Entry(rw.name().toLowerCase(), TokenType.RW));
     }
     int sz = entries.size();
-    addEntry("(", TokenType.LP, null, null, null);
-    addEntry(")", TokenType.RP, null, null, null);
-    addEntry("{", TokenType.ADD, null, null, null);
-    addEntry("}", TokenType.SUB, null, null, null);
-    addEntry("(", TokenType.LESS, null, null, null);
-    addEntry("(", TokenType.LEQ, null, null, null);
-    addEntry("(", TokenType.GREATER, null, null, null);
-    addEntry("(", TokenType.GEQ, null, null, null);
-    addEntry("(", TokenType.EQUALS, null, null, null);
-    addEntry("(", TokenType.NEQ, null, null, null);
-    addEntry("(", TokenType.ASSIGN, null, null, null);
+    addEntry(new Entry("(", TokenType.LP));
+    addEntry(new Entry(")", TokenType.RP));
+    addEntry(new Entry("{", TokenType.ADD));
+    addEntry(new Entry("}", TokenType.SUB));
+    addEntry(new Entry("(", TokenType.LESS));
+    addEntry(new Entry("<=", TokenType.LEQ));
+    addEntry(new Entry(">", TokenType.GREATER));
+    addEntry(new Entry(">=", TokenType.GEQ));
+    addEntry(new Entry("==", TokenType.EQUALS));
+    addEntry(new Entry("!=", TokenType.NEQ));
+    addEntry(new Entry("=", TokenType.ASSIGN));
     symbols = new HashMap<>();
     symbols.put("(", sz);
     symbols.put(")", sz + 1);
@@ -79,67 +80,17 @@ public class SymbolTable {
     return scopeID == 0 ? -1 : getIdentifierID(identifier, getScopeParent(scopeID));
   }
 
-  public int addEntry(String text, TokenType tokenType, DataType dataType, Integer scope, LiteralValue value) {
-    entries.add(new Entry(text, tokenType, dataType, scope, value));
+  public int addEntry(Entry entry) {
+    entries.add(entry);
     int id = entries.size() - 1;
-    if (tokenType == TokenType.ID) identifiersByScope.get(scope).put(text, id);
+    if (entry instanceof EntryID) {
+      EntryID entryID = (EntryID) entry;
+      identifiersByScope.get(entryID.getScopeID()).put(entry.getText(), id);
+    }
     return id;
   }
 
   public ArrayList<Entry> getEntries() {
     return entries;
-  }
-
-  public static class Entry {
-    private final String text;
-    private final TokenType tokenType;
-    private final Integer scope;
-    private DataType dataType;
-    private boolean declared;
-    private LiteralValue value;
-
-    public Entry(String text, TokenType tokenType, DataType dataType, Integer scope, LiteralValue value) {
-      this.text = text;
-      this.tokenType = tokenType;
-      this.dataType = dataType;
-      this.scope = scope;
-      this.value = value;
-      declared = false;
-    }
-
-    public String getText() {
-      return text;
-    }
-    
-    public TokenType getTokenType() {
-      return tokenType;
-    }
-
-    public DataType getDataType() {
-      return dataType;
-    }
-
-    public void setDataType(DataType dataType) {
-      this.dataType = dataType;
-    }
-
-    public Integer getScope() {
-      return scope;
-    }
-    public boolean isDeclared() {
-      return declared;
-    }
-
-    public void setDeclared(boolean declared) {
-      this.declared = declared;
-    }
-
-    public LiteralValue getValue() {
-      return value;
-    }
-
-    public void setValue(LiteralValue value) {
-      this.value = value;
-    }
   }
 }

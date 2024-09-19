@@ -3,7 +3,8 @@ package MVC.Model.Parser;
 import java.util.ArrayList;
 
 import MVC.Model.Constants.*;
-import MVC.Model.Parser.ParseTree.Node;
+import MVC.Model.Parser.ParseTree;
+import MVC.Model.Parser.Node.*;
 import MVC.Model.Scanner.Token;
 
 public class Parser {
@@ -32,7 +33,7 @@ public class Parser {
 
   private boolean sentences(Node node, Node parent) {
     if (node == null) {
-      node = new Node(Production.SENTENCES, null);
+      node = new NodeNonTerminal(Production.SENTENCES);
       if (!sentences(node, parent)) return false;
       goBack();
       parent.addChild(node);
@@ -45,7 +46,7 @@ public class Parser {
   }
 
   private boolean sentence(Node parent) {
-    Node node = new Node(Production.SENTENCE, null);
+    Node node = new NodeNonTerminal(Production.SENTENCE);
     if (matchRW(ReservedWord.READ, node)) {
       goNext();
       if (!match(TokenType.ID, node)) return false;
@@ -116,7 +117,7 @@ public class Parser {
   }
 
   private boolean operation(Node parent) {
-    Node node = new Node(Production.OPERATION, null);
+    Node node = new NodeNonTerminal(Production.OPERATION);
     if (data(node)) {
       parent.addChild(node);
       return true;
@@ -135,7 +136,7 @@ public class Parser {
   }
   
   private boolean condition(Node parent) {
-    Node node = new Node(Production.CONDITION, null);
+    Node node = new NodeNonTerminal(Production.CONDITION);
     if (!operation(node)) return false;
     goNext();
     if (!comparationOperator(node)) return false;
@@ -146,28 +147,28 @@ public class Parser {
   }
   
   private boolean data(Node parent) {
-    Node node = new Node(Production.DATA, null);
+    Node node = new NodeNonTerminal(Production.DATA);
     if (!match(TokenType.LITERAL, node) && !match(TokenType.ID, node)) return false;
     parent.addChild(node);
     return true;
   }
   
   private boolean dataType(Node parent) {
-    Node node = new Node(Production.DATA_TYPE, null);
+    Node node = new NodeNonTerminal(Production.DATA_TYPE);
     if (!matchRW(ReservedWord.INT, node) && !matchRW(ReservedWord.STRING, node)) return false;
     parent.addChild(node);
     return true;
   }
 
   private boolean arithmeticOperator(Node parent) {
-    Node node = new Node(Production.ARITHMETIC_OPERATOR, tokenStream.get(i));
+    Node node = new NodeNonTerminal(Production.ARITHMETIC_OPERATOR);
     if (!match(TokenType.ADD, node) && !match(TokenType.SUB, node)) return false;
     parent.addChild(node);
     return true;
   }
 
   private boolean comparationOperator(Node parent) {
-    Node node = new Node(Production.COMPARATION_OPERATOR, tokenStream.get(i));
+    Node node = new NodeNonTerminal(Production.COMPARATION_OPERATOR);
     if (!match(TokenType.LESS, node) && !match(TokenType.LEQ, node) &&
         !match(TokenType.GREATER, node) && !match(TokenType.GEQ, node) &&
         !match(TokenType.EQUALS, node) && !match(TokenType.NEQ, node)) return false;
@@ -190,7 +191,7 @@ public class Parser {
     if (i >= tokenStream.size()) return false;
     Token token = tokenStream.get(i);
     if (token.getTokenType() != tokenType) return false;
-    parent.addChild(new Node(null, token));
+    parent.addChild(new NodeTerminal(token));
     return true;
   }
 
@@ -198,7 +199,7 @@ public class Parser {
     if (i >= tokenStream.size()) return false;
     Token token = tokenStream.get(i);
     if (token.getSymbolTableID() != reservedWord.ordinal()) return false;
-    parent.addChild(new Node(null, token));
+    parent.addChild(new NodeTerminal(token));
     return true;
   }
 
