@@ -56,7 +56,6 @@ public class SemanticAnalyzer {
         int identifierID = secondChild.getToken().getSymbolTableID();
         EntryID entry = (EntryID) symbolTable.getEntries().get(identifierID);
         if (entry.isDeclared()) return false;
-        entry.declare();
         entry.setDataType(isIntDeclaration ? DataType.INT : DataType.STRING);
         return true;
       }

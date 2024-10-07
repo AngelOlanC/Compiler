@@ -1,5 +1,5 @@
-import MVC.Controller;
-import MVC.View;
+import MVC.View.View;
+import MVC.Controller.Controller;
 
 public class Main {
   public static void main(String[] a) {
