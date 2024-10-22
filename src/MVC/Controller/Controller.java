@@ -1,5 +1,8 @@
 package MVC.Controller;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -92,11 +95,18 @@ public class Controller implements ActionListener, KeyListener {
       return;
     }
     if (e.getSource() == view.getStartIntermediateCodeGenerationButton()) {
-      intermediateCodeGenerator = new IntermediateCodeGenerator(symbolTable);
+      intermediateCodeGenerator = new IntermediateCodeGenerator(symbolTable, parser.getParseTree());
       String code = intermediateCodeGenerator.generateIntermediateCode();
       System.out.println(code);
       view.getIntermediateCodePane().setText(code);
       view.getStartIntermediateCodeGenerationButton().setEnabled(false);
+      return;
+    }
+    if (e.getSource() == view.getCopyIntermediateCodeButton()) {
+      StringSelection stringSelection = new StringSelection (view.getIntermediateCodePane().getText());
+      Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
+      clpbrd.setContents (stringSelection, null);
+      return;
     }
   }
 

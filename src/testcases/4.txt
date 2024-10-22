@@ -1,0 +1,7 @@
+{
+	int x
+	read x
+	print "este es tu numero 2 veces"
+	print x
+	print x
+}

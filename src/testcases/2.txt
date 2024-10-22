@@ -25,5 +25,7 @@
             }
         }
     }
-    print ("the count is " + ans)
+    string msg
+    msg = ("la cuenta es " + ans)
+    print msg
 }

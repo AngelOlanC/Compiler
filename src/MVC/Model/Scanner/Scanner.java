@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import MVC.Model.Constants.DataType;
 import MVC.Model.Constants.TokenType;
-import MVC.Model.LiteralValue.LiteralValueInteger;
-import MVC.Model.LiteralValue.LiteralValueString;
 import MVC.Model.SymbolTable.SymbolTable;
 import MVC.Model.SymbolTable.Entry.EntryID;
 import MVC.Model.SymbolTable.Entry.EntryLiteral;
@@ -104,8 +102,7 @@ public class Scanner {
           int idOnSymbolTable = symbolTable.addEntry(
                                     new EntryLiteral(text, 
                                                      TokenType.LITERAL, 
-                                                     DataType.STRING,
-                                                     new LiteralValueString(text.substring(1, text.length() - 1))));
+                                                     DataType.STRING));
           tokenStream.add(new Token(TokenType.LITERAL, text, idOnSymbolTable));
           ++i;
           continue;
@@ -123,8 +120,7 @@ public class Scanner {
         int idOnSymbolTable = symbolTable.addEntry(
                                     new EntryLiteral(text, 
                                                      TokenType.LITERAL, 
-                                                     DataType.INT,
-                                                     new LiteralValueInteger(Integer.parseInt(text))));
+                                                     DataType.INT));
         tokenStream.add(new Token(TokenType.LITERAL, text, idOnSymbolTable));
         continue;
       }

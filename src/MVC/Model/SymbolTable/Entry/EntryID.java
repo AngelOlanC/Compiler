@@ -2,12 +2,10 @@ package MVC.Model.SymbolTable.Entry;
 
 import MVC.Model.Constants.DataType;
 import MVC.Model.Constants.TokenType;
-import MVC.Model.LiteralValue.LiteralValue;
 
 public class EntryID extends Entry {
   private final Integer scopeID;
   private DataType dataType;
-  private LiteralValue value;
 
   public EntryID(String text, TokenType tokenType, DataType dataType, Integer scopeID) {
     super(text, tokenType);
@@ -29,9 +27,5 @@ public class EntryID extends Entry {
 
   public boolean isDeclared() {
     return dataType != null;
-  }
-
-  public LiteralValue getValue() {
-    return value;
   }
 }

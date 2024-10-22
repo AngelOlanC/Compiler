@@ -10,13 +10,19 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.PlainDocument;
+
+import org.w3c.dom.Document;
 
 import MVC.Controller.Controller;
 
 public class View extends JFrame {
   private JTextArea codingArea;
   private JTextPane tokensPane, parserPane, semanticPane, intermediateCodePane;
-  private JButton startScannerButton, startParserButton, startSemanticButton, startIntermediateCodeGenerationButton;
+  private JButton startScannerButton, startParserButton, startSemanticButton, startIntermediateCodeGenerationButton, copyIntermediateCodeButton;
   private int placedButtons;
   private final int FRAME_WIDTH, FRAME_HEIGHT;
   private final int X_CODING_AREA, X_TOKENS, X_PARSER_SEMANTIC, X_INTERMEDIATE_CODE, Y_UPPER_PANELS, Y_LOWER_PANELS, Y_UPPER_TEXT, Y_LOWER_TEXT, Y_BUTTONS;
@@ -34,7 +40,7 @@ public class View extends JFrame {
     Y_UPPER_TEXT = 10;
     Y_LOWER_TEXT = 250;
     Y_BUTTONS = 480;
-    BUTTONS = 4;
+    BUTTONS = 5;
     BUTTON_WIDTH = 150;
     BUTTON_HEIGHT = 50;
     MARGIN_LEFT_BUTTON = (FRAME_WIDTH - BUTTONS * BUTTON_WIDTH) / (BUTTONS + 1);
@@ -67,9 +73,11 @@ public class View extends JFrame {
     codingArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
     codingArea.setFont(innerTextFont);
 
+    ((PlainDocument) codingArea.getDocument()).setDocumentFilter(new ChangeTabToSpacesFilter(4));
+
     JScrollPane scrollCode = new JScrollPane(codingArea);
     scrollCode.setBounds(X_CODING_AREA, Y_UPPER_PANELS, 450, 400);
-    add(scrollCode);
+    add(scrollCode);  
 
     JLabel textTokensPane = new JLabel("TOKENS");
     textTokensPane.setFont(outerTextFont);
@@ -144,6 +152,7 @@ public class View extends JFrame {
     placeButton(startParserButton = new JButton(), "Parser");
     placeButton(startSemanticButton = new JButton(), "Semantic");
     placeButton(startIntermediateCodeGenerationButton = new JButton(), "Intermediate Code");
+    placeButton(copyIntermediateCodeButton = new JButton(), "Copy inter. code");
   }
 
   private void placeButton(JButton button, String text) {
@@ -161,6 +170,7 @@ public class View extends JFrame {
     startParserButton.addActionListener(controller);
     startSemanticButton.addActionListener(controller);
     startIntermediateCodeGenerationButton.addActionListener(controller);
+    copyIntermediateCodeButton.addActionListener(controller);
     codingArea.addKeyListener(controller);
   }
 
@@ -212,5 +222,41 @@ public class View extends JFrame {
 
   public JTextPane getIntermediateCodePane() {
     return intermediateCodePane;
+  }
+
+  public JButton getCopyIntermediateCodeButton() {
+    return copyIntermediateCodeButton;
+  }
+
+  private static class ChangeTabToSpacesFilter extends DocumentFilter {
+    private int spaceCount;
+    private String spaces = "";
+    
+    public ChangeTabToSpacesFilter(int spaceCount) {
+      this.spaceCount = spaceCount;
+      for (int i = 0; i < spaceCount; i++) {
+        spaces += " ";
+      }
+    }
+
+    @Override
+    public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+            throws BadLocationException {
+      string = string.replace("\t", spaces);
+      super.insertString(fb, offset, string, attr);
+    }
+    
+    @Override
+    public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+      super.remove(fb, offset, length);
+    }
+    
+    @Override
+    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+            throws BadLocationException {
+      text = text.replace("\t", spaces);
+      super.replace(fb, offset, length, text, attrs);
+    }
+    
   }
 }

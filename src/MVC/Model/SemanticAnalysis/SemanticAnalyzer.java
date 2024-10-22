@@ -44,8 +44,8 @@ public class SemanticAnalyzer {
     if (children.isEmpty()) return true;
 
     Node firstChild = children.getFirst();
-
-    if (firstChild instanceof NodeNonTerminal) {
+    boolean isDeclaration = firstChild instanceof NodeNonTerminal;
+    if (isDeclaration) {
       NodeTerminal dataTypeNode = (NodeTerminal) firstChild.getChildren().getFirst();
       Token dataTypeToken = dataTypeNode.getToken();
 
@@ -131,7 +131,8 @@ public class SemanticAnalyzer {
     DataType dataTypeLeftOperation = operation(children.get(1)),
              dataTypeRightOperation = operation(children.get(3));
     
-    if (dataTypeLeftOperation == null || dataTypeRightOperation == null) {
+    if (dataTypeLeftOperation == null || dataTypeRightOperation == null ||
+        dataTypeLeftOperation == DataType.STRING || dataTypeRightOperation == DataType.STRING) {
       return null;
     }
 
@@ -155,15 +156,7 @@ public class SemanticAnalyzer {
     DataType dataTypeLeftOperation = operation(children.get(0)),
              dataTypeRightOperation = operation(children.get(2));
 
-    if (dataTypeLeftOperation == null || dataTypeRightOperation == null) {
-      return false;
-    }
-
-    NodeTerminal nodeOperator = (NodeTerminal) children.get(1).getChildren().get(0);
-    TokenType tokenTypeOperator = nodeOperator.getToken().getTokenType();
-    if (tokenTypeOperator == TokenType.EQUALS || tokenTypeOperator == TokenType.NEQ) {
-      return true;
-    }
-    return dataTypeLeftOperation == DataType.INT && dataTypeRightOperation == DataType.INT;
+    return dataTypeLeftOperation != null && dataTypeRightOperation != null &&
+        dataTypeLeftOperation == DataType.INT && dataTypeRightOperation == DataType.INT;
   }
 }
