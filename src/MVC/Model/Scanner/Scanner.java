@@ -25,44 +25,27 @@ public class Scanner {
     int i = 0, n = source.length(), scopeCnt = 0, scopeID = 0;
     while (i < n) {
       char c = source.charAt(i);
-      if (c == ' ' || c == '\t' || c == '\n') { ++i; continue; }
-      if (c == '{') {
-        ++i;
-        symbolTable.addScope(scopeID);
-        scopeID = ++scopeCnt;
-        int idOnSymbolTable = symbolTable.getSymbolID("{");
-        tokenStream.add(new Token(TokenType.LCB, "{", idOnSymbolTable));
-        continue;
+      if (c == ' ' || c == '\t' || c == '\n') { 
+        ++i; 
+        continue; 
       }
-      if (c == '}') {
+      if (TokenType.match("" + c) != null) {
+        String txt = "" + c;
+        TokenType tokenType = TokenType.match(txt);
         ++i;
-        scopeID = symbolTable.getScopeParent(scopeID);
-        int idOnSymbolTable = symbolTable.getSymbolID("}");
-        tokenStream.add(new Token(TokenType.RCB, "}", idOnSymbolTable));
-        continue;
-      }
-      if (c == '+') {
-        ++i;
-        int idOnSymbolTable = symbolTable.getSymbolID(Character.toString(c));
-        tokenStream.add(new Token(TokenType.ADD, "+", idOnSymbolTable));
-        continue;
-      }
-      if (c == '-') {
-        ++i;
-        int idOnSymbolTable = symbolTable.getSymbolID("-");
-        tokenStream.add(new Token(TokenType.SUB, "-", idOnSymbolTable));
-        continue;
-      }
-      if (c == '(') {
-        ++i;
-        int idOnSymbolTable = symbolTable.getSymbolID("(");
-        tokenStream.add(new Token(TokenType.LP, "(", idOnSymbolTable));
-        continue;
-      }
-      if (c == ')') {
-        ++i;
-        int idOnSymbolTable = symbolTable.getSymbolID(")");
-        tokenStream.add(new Token(TokenType.RP, ")", idOnSymbolTable));
+        if (i != n && TokenType.match(txt + source.charAt(i)) != null) {
+          txt += source.charAt(i);
+          tokenType = TokenType.match(txt);
+          ++i;
+        }
+        int idOnSymbolTable = symbolTable.getSymbolID(txt);
+        tokenStream.add(new Token(tokenType, txt, idOnSymbolTable));
+        if (txt.equals("{")) {
+          symbolTable.addScope(scopeID);
+          scopeID = ++scopeCnt;
+        } else if (txt.equals("}")) {
+          scopeID = symbolTable.getScopeParent(scopeID);
+        }
         continue;
       }
       if (Character.isLowerCase(c)) {
@@ -122,48 +105,6 @@ public class Scanner {
                                                      TokenType.LITERAL, 
                                                      DataType.INT));
         tokenStream.add(new Token(TokenType.LITERAL, text, idOnSymbolTable));
-        continue;
-      }
-      if (c == '<') {
-        if (++i == n || source.charAt(i) != '=') {
-          int idOnSymbolTable = symbolTable.getSymbolID("<");
-          tokenStream.add(new Token(TokenType.LESS, "<", idOnSymbolTable));
-          continue;
-        }
-        int idOnSymbolTable = symbolTable.getSymbolID("<=");
-        tokenStream.add(new Token(TokenType.LEQ, "<=", idOnSymbolTable));
-        ++i;
-        continue;
-      }
-      if (c == '>') {
-        if (++i == n || source.charAt(i) != '=') {
-          int idOnSymbolTable = symbolTable.getSymbolID(">");
-          tokenStream.add(new Token(TokenType.GREATER, ">", idOnSymbolTable));
-          continue;
-        }
-        int idOnSymbolTable = symbolTable.getSymbolID(">=");
-        tokenStream.add(new Token(TokenType.GEQ, ">=", idOnSymbolTable));
-        ++i;
-        continue;
-      }
-      if (c == '=') {
-        if (++i == n || source.charAt(i) != '=') {
-          int idOnSymbolTable = symbolTable.getSymbolID("=");
-          tokenStream.add(new Token(TokenType.ASSIGN, "=", idOnSymbolTable));
-          continue;
-        }
-        int idOnSymbolTable = symbolTable.getSymbolID("==");
-        tokenStream.add(new Token(TokenType.EQUALS, "==", idOnSymbolTable));
-        ++i;
-        continue;
-      }
-      if (c == '!') {
-        if (++i == n) return false;
-        c = source.charAt(i);
-        if (c != '=') return false;
-        int idOnSymbolTable = symbolTable.getSymbolID("!=");
-        tokenStream.add(new Token(TokenType.NEQ, "!=", idOnSymbolTable));
-        ++i;
         continue;
       }
       return false;

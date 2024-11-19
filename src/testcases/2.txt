@@ -9,23 +9,25 @@
     ans = 0
 
     int i
-    i = 0
+    i = 1
     while i <= n {
         int j
-        j = 0
-        while j <= i {
+        j = i
+        while j <= n {
             int k
-            k = 0
-            while k <= j {
+            k = j
+            while k <= n {
                 int suma
                 suma = ((i + j) + k)
                 if suma == x {
                   ans = (ans + 1)
                 }
+                k = (k + 1)
             }
+            j = (j + 1)
         }
+        i = (i + 1)
     }
-    string msg
-    msg = ("la cuenta es " + ans)
-    print msg
+    print "maneras de sumar x"
+    print ans
 }

@@ -24,32 +24,13 @@ public class SymbolTable {
     for (ReservedWord rw : ReservedWord.values()) {
       addEntry(new Entry(rw.name().toLowerCase(), TokenType.RW));
     }
-    int sz = entries.size();
-    addEntry(new Entry("(", TokenType.LP));
-    addEntry(new Entry(")", TokenType.RP));
-    addEntry(new Entry("{", TokenType.ADD));
-    addEntry(new Entry("}", TokenType.SUB));
-    addEntry(new Entry("(", TokenType.LESS));
-    addEntry(new Entry("<=", TokenType.LEQ));
-    addEntry(new Entry(">", TokenType.GREATER));
-    addEntry(new Entry(">=", TokenType.GEQ));
-    addEntry(new Entry("==", TokenType.EQUALS));
-    addEntry(new Entry("!=", TokenType.NEQ));
-    addEntry(new Entry("=", TokenType.ASSIGN));
     symbols = new HashMap<>();
-    symbols.put("(", sz);
-    symbols.put(")", sz + 1);
-    symbols.put("{", sz + 2);
-    symbols.put("}", sz + 3);
-    symbols.put("+", sz + 4);
-    symbols.put("-", sz + 5);
-    symbols.put("<", sz + 6);
-    symbols.put("<=", sz + 7);
-    symbols.put(">", sz + 8);
-    symbols.put(">=", sz + 9);
-    symbols.put("==", sz + 10);
-    symbols.put("!=", sz + 11);
-    symbols.put("=", sz + 12);
+    for (TokenType tokenType : TokenType.values()) {
+      if (tokenType.getValue() != null) {
+        symbols.put(tokenType.getValue(), entries.size());
+        addEntry(new Entry(tokenType.getValue(), tokenType));
+      }
+    }
   }
 
   public int getSymbolID(String symbol) {

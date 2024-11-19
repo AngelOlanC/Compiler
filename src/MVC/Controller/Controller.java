@@ -1,5 +1,6 @@
 package MVC.Controller;
 
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -9,7 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
-import MVC.Model.IntermediateCodeGeneration.IntermediateCodeGenerator;
+import MVC.Model.CodeGenerator.CodeGenerator;
 import MVC.Model.Parser.Parser;
 import MVC.Model.Scanner.Scanner;
 import MVC.Model.Scanner.Token;
@@ -23,7 +24,7 @@ public class Controller implements ActionListener, KeyListener {
   private Scanner scanner;
   private Parser parser;
   private SemanticAnalyzer semanticAnalyzer;
-  private IntermediateCodeGenerator intermediateCodeGenerator;
+  private CodeGenerator codeGenerator;
 
   public Controller(View view) {
     this.view = view;
@@ -95,27 +96,63 @@ public class Controller implements ActionListener, KeyListener {
       return;
     }
     if (e.getSource() == view.getStartIntermediateCodeGenerationButton()) {
-      intermediateCodeGenerator = new IntermediateCodeGenerator(symbolTable, parser.getParseTree());
-      String code = intermediateCodeGenerator.generateIntermediateCode();
-      System.out.println(code);
-      view.getIntermediateCodePane().setText(code);
+      codeGenerator = new CodeGenerator(symbolTable, parser.getParseTree());
+      String intermediateAndMachineCode = codeGenerator.generate();
+      view.getIntermediateAndMachineCodePane().setText(intermediateAndMachineCode);
       view.getStartIntermediateCodeGenerationButton().setEnabled(false);
+      view.getCopyIntermediateCodeButton().setEnabled(true);
       return;
     }
     if (e.getSource() == view.getCopyIntermediateCodeButton()) {
-      StringSelection stringSelection = new StringSelection (view.getIntermediateCodePane().getText());
-      Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
+      StringSelection stringSelection = new StringSelection(codeGenerator.getIntermediateCode());
+      Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
       clpbrd.setContents (stringSelection, null);
       return;
     }
   }
 
+  private boolean ctrlPressed = false;
+
   @Override
-  public void keyPressed(KeyEvent e) {}
+  public void keyPressed(KeyEvent e) {
+    if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+      ctrlPressed = true;
+      return;
+    }
+    if (!ctrlPressed) {
+      return;
+    }
+    int currentFontSize = view.getCodingArea().getFont().getSize(), newFontSize;
+    if (e.getKeyCode() == KeyEvent.VK_PLUS) {
+      newFontSize = currentFontSize + 1;
+    } else if (e.getKeyCode() == KeyEvent.VK_MINUS) {
+      newFontSize = currentFontSize - 1;
+    } else if (e.getKeyCode() == KeyEvent.VK_0) {
+      newFontSize = 16;
+    } else {
+      if (e.getKeyCode() == KeyEvent.VK_X || e.getKeyCode() == KeyEvent.VK_V) {
+        resetView();
+      }
+      return;
+    }
+    Font newFont = new Font(Font.MONOSPACED, Font.PLAIN, newFontSize);
+    view.getCodingArea().setFont(newFont);
+  }
   @Override
-  public void keyReleased(KeyEvent e) {}
+  public void keyReleased(KeyEvent e) {
+    if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+      ctrlPressed = false;
+      return;
+    }
+  }
   @Override
   public void keyTyped(KeyEvent e) {
+    if (!ctrlPressed) {
+      resetView();
+    }
+  }
+
+  private void resetView() {
     view.resetButtons();
     view.resetResultPanels();
   }

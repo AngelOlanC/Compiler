@@ -15,30 +15,30 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.PlainDocument;
 
-import org.w3c.dom.Document;
-
 import MVC.Controller.Controller;
 
 public class View extends JFrame {
   private JTextArea codingArea;
-  private JTextPane tokensPane, parserPane, semanticPane, intermediateCodePane;
+  private JTextPane tokensPane, parserPane, semanticPane, intermediateAndMachineCodePane;
   private JButton startScannerButton, startParserButton, startSemanticButton, startIntermediateCodeGenerationButton, copyIntermediateCodeButton;
   private int placedButtons;
-  private final int FRAME_WIDTH, FRAME_HEIGHT;
-  private final int X_CODING_AREA, X_TOKENS, X_PARSER_SEMANTIC, X_INTERMEDIATE_CODE, Y_UPPER_PANELS, Y_LOWER_PANELS, Y_UPPER_TEXT, Y_LOWER_TEXT, Y_BUTTONS;
+  private final int FRAME_WIDTH, FRAME_HEIGHT, HORIZONTAL_SEPARATION;
+  private final int WIDTH_CODING_AREA, WIDTH_TOKENS, WIDTH_INTERMEDIATE_CODE;
+  private final int X_CODING_AREA, X_TOKENS, X_INTERMEDIATE_AND_MACHINE_CODE, Y_UPPER_PANELS, Y_UPPER_TEXT, Y_BUTTONS;
   private final int BUTTONS, BUTTON_WIDTH, BUTTON_HEIGHT, MARGIN_LEFT_BUTTON;
 
   public View() {
-    FRAME_WIDTH = 1325;
+    FRAME_WIDTH = 1334;
     FRAME_HEIGHT = 600;
+    HORIZONTAL_SEPARATION = 30;
     X_CODING_AREA = 50;
-    X_TOKENS = 550;
-    X_PARSER_SEMANTIC = 750;
-    X_INTERMEDIATE_CODE = 950;
+    WIDTH_CODING_AREA = 400;
+    WIDTH_TOKENS = 140;
+    WIDTH_INTERMEDIATE_CODE = 650;
+    X_TOKENS = X_CODING_AREA + WIDTH_CODING_AREA + HORIZONTAL_SEPARATION;
+    X_INTERMEDIATE_AND_MACHINE_CODE = X_TOKENS + WIDTH_TOKENS + HORIZONTAL_SEPARATION;
     Y_UPPER_PANELS = 50;
-    Y_LOWER_PANELS = 300;
     Y_UPPER_TEXT = 10;
-    Y_LOWER_TEXT = 250;
     Y_BUTTONS = 480;
     BUTTONS = 5;
     BUTTON_WIDTH = 150;
@@ -59,8 +59,8 @@ public class View extends JFrame {
   }
 
   private void makeInterface() {
-    Font outerTextFont = new Font("New Courier", Font.PLAIN, 30);
-    Font innerTextFont = new Font("New Courier", Font.PLAIN, 15);
+    Font outerTextFont = new Font("New Courier", Font.PLAIN, 26);
+    Font innerTextFont = new Font(Font.MONOSPACED, Font.PLAIN, 14);
 
     JLabel textCodingArea = new JLabel("CODING AREA");
     textCodingArea.setFont(outerTextFont);
@@ -71,12 +71,12 @@ public class View extends JFrame {
     codingArea.setBackground(Color.WHITE);
     codingArea.setOpaque(true);
     codingArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    codingArea.setFont(innerTextFont);
+    codingArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 
     ((PlainDocument) codingArea.getDocument()).setDocumentFilter(new ChangeTabToSpacesFilter(4));
 
     JScrollPane scrollCode = new JScrollPane(codingArea);
-    scrollCode.setBounds(X_CODING_AREA, Y_UPPER_PANELS, 450, 400);
+    scrollCode.setBounds(X_CODING_AREA, Y_UPPER_PANELS, WIDTH_CODING_AREA, 400);
     add(scrollCode);  
 
     JLabel textTokensPane = new JLabel("TOKENS");
@@ -93,13 +93,13 @@ public class View extends JFrame {
     tokensPane.setFont(innerTextFont);
 
     JScrollPane scrollTokens = new JScrollPane(tokensPane);
-    scrollTokens.setBounds(X_TOKENS, Y_UPPER_PANELS, 150, 400);
+    scrollTokens.setBounds(X_TOKENS, Y_UPPER_PANELS, WIDTH_TOKENS, 200);
     add(scrollTokens);
 
     JLabel textParserPane = new JLabel("PARSER");
     textParserPane.setFont(outerTextFont);
     
-    textParserPane.setBounds(X_PARSER_SEMANTIC, Y_UPPER_TEXT, 1000, 50);
+    textParserPane.setBounds(X_TOKENS, 250, 1000, 50);
     add(textParserPane);
 
     parserPane = new JTextPane();
@@ -111,12 +111,12 @@ public class View extends JFrame {
     parserPane.setFont(innerTextFont);
 
     JScrollPane scrollParser = new JScrollPane(parserPane);
-    scrollParser.setBounds(X_PARSER_SEMANTIC, Y_UPPER_PANELS, 150, 150);
+    scrollParser.setBounds(X_TOKENS, 300, WIDTH_TOKENS, 50);
     add(scrollParser);
 
     JLabel textSemanticPane = new JLabel("SEMANTIC");
     textSemanticPane.setFont(outerTextFont);
-    textSemanticPane.setBounds(X_PARSER_SEMANTIC, Y_LOWER_TEXT, 1000, 50);
+    textSemanticPane.setBounds(X_TOKENS, 350, 1000, 50);
     add(textSemanticPane);
 
     semanticPane = new JTextPane();
@@ -128,25 +128,25 @@ public class View extends JFrame {
     semanticPane.setFont(innerTextFont);
 
     JScrollPane scrollSemantic = new JScrollPane(semanticPane);
-    scrollSemantic.setBounds(X_PARSER_SEMANTIC, Y_LOWER_PANELS, 150, 150);
+    scrollSemantic.setBounds(X_TOKENS, 400, WIDTH_TOKENS, 50);
     add(scrollSemantic);
 
-    JLabel textIntermediateCodePane = new JLabel("INTER. CODE");
-    textIntermediateCodePane.setFont(outerTextFont);
-    textIntermediateCodePane.setBounds(X_INTERMEDIATE_CODE, Y_UPPER_TEXT, 1000, 50);
-    add(textIntermediateCodePane);
+    JLabel textIntermediateAndMachineCodePane = new JLabel("INTERMEDIATE AND MACHINE CODE");
+    textIntermediateAndMachineCodePane.setFont(outerTextFont);
+    textIntermediateAndMachineCodePane.setBounds(X_INTERMEDIATE_AND_MACHINE_CODE, Y_UPPER_TEXT, 1000, 50);
+    add(textIntermediateAndMachineCodePane);
 
-    intermediateCodePane = new JTextPane();
-    intermediateCodePane.setEnabled(false);
-    intermediateCodePane.setBackground(Color.WHITE);
-    intermediateCodePane.setOpaque(true);
-    intermediateCodePane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-    intermediateCodePane.setDisabledTextColor(Color.BLACK);
-    intermediateCodePane.setFont(innerTextFont);
+    intermediateAndMachineCodePane = new JTextPane();
+    intermediateAndMachineCodePane.setEnabled(false);
+    intermediateAndMachineCodePane.setBackground(Color.WHITE);
+    intermediateAndMachineCodePane.setOpaque(true);
+    intermediateAndMachineCodePane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    intermediateAndMachineCodePane.setDisabledTextColor(Color.BLACK);
+    intermediateAndMachineCodePane.setFont(innerTextFont);
 
-    JScrollPane scrollIntermediateCode = new JScrollPane(intermediateCodePane);
-    scrollIntermediateCode.setBounds(X_INTERMEDIATE_CODE, Y_UPPER_PANELS, 300, 400);
-    add(scrollIntermediateCode);
+    JScrollPane scrollIntermediateAndMachineCode = new JScrollPane(intermediateAndMachineCodePane);
+    scrollIntermediateAndMachineCode.setBounds(X_INTERMEDIATE_AND_MACHINE_CODE, Y_UPPER_PANELS, WIDTH_INTERMEDIATE_CODE, 400);
+    add(scrollIntermediateAndMachineCode);
 
     placeButton(startScannerButton = new JButton(), "Scanner");
     placeButton(startParserButton = new JButton(), "Parser");
@@ -166,26 +166,27 @@ public class View extends JFrame {
   }
 
   public void setListener(Controller controller) {
+    codingArea.addKeyListener(controller);
     startScannerButton.addActionListener(controller);
     startParserButton.addActionListener(controller);
     startSemanticButton.addActionListener(controller);
     startIntermediateCodeGenerationButton.addActionListener(controller);
     copyIntermediateCodeButton.addActionListener(controller);
-    codingArea.addKeyListener(controller);
   }
 
   public void resetButtons() {
-    getStartScannerButton().setEnabled(true);
-    getStartParserButton().setEnabled(false);
-    getStartSemanticButton().setEnabled(false);
-    getStartIntermediateCodeGenerationButton().setEnabled(false);
+    startScannerButton.setEnabled(true);
+    startParserButton.setEnabled(false);
+    startSemanticButton.setEnabled(false);
+    startIntermediateCodeGenerationButton.setEnabled(false);
+    copyIntermediateCodeButton.setEnabled(false);
   }
 
   public void resetResultPanels() {
     tokensPane.setText("");
     parserPane.setText("");
     semanticPane.setText("");
-    intermediateCodePane.setText("");
+    intermediateAndMachineCodePane.setText("");
   }
 
   public JTextArea getCodingArea() {
@@ -220,8 +221,8 @@ public class View extends JFrame {
     return startIntermediateCodeGenerationButton;
   }
 
-  public JTextPane getIntermediateCodePane() {
-    return intermediateCodePane;
+  public JTextPane getIntermediateAndMachineCodePane() {
+    return intermediateAndMachineCodePane;
   }
 
   public JButton getCopyIntermediateCodeButton() {
@@ -229,11 +230,9 @@ public class View extends JFrame {
   }
 
   private static class ChangeTabToSpacesFilter extends DocumentFilter {
-    private int spaceCount;
     private String spaces = "";
     
     public ChangeTabToSpacesFilter(int spaceCount) {
-      this.spaceCount = spaceCount;
       for (int i = 0; i < spaceCount; i++) {
         spaces += " ";
       }

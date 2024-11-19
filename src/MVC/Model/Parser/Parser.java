@@ -161,7 +161,8 @@ public class Parser {
 
   private boolean arithmeticOperator(Node parent) {
     Node node = new NodeNonTerminal(Production.ARITHMETIC_OPERATOR);
-    if (!match(TokenType.ADD, node) && !match(TokenType.SUB, node)) return false;
+    if (!match(TokenType.ADD, node) && !match(TokenType.SUB, node) && !match(TokenType.MUL, node) 
+     && !match(TokenType.DIV, node) && !match(TokenType.REM, node)) return false;
     parent.addChild(node);
     return true;
   }
